@@ -3,10 +3,6 @@
 .cursor-server/
 .vscode/
 
-# External tool repos (huge)
-maestro/
-timeloop/
-timeloop-accelergy-exercises/
 
 # Python cache
 __pycache__/

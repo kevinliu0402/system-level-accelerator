@@ -1,0 +1,9 @@
+[submodule "maestro"]
+	path = maestro
+	url = https://github.com/maestro-project/maestro.git
+[submodule "timeloop"]
+	path = timeloop
+	url = https://github.com/NVlabs/timeloop.git
+[submodule "timeloop-accelergy-exercises"]
+	path = timeloop-accelergy-exercises
+	url = https://github.com/Accelergy-Project/timeloop-accelergy-exercises.git
