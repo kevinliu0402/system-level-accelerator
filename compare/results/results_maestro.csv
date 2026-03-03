@@ -1,0 +1,4 @@
+dataflow,framework,latency_cycles,energy_mac_units,utilization_pct
+ShiDianNao_OS,MAESTRO,1089536,1789720000.0,0
+NVDLA_WS,MAESTRO,2146176,905857000.0,0
+Eyeriss_RS,MAESTRO,1382402,1998460000.0,0

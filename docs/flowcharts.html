@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dataflow reference – Mermaid</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 0 auto; padding: 1rem; }
+    h1 { font-size: 1.25rem; margin-top: 2rem; }
+    .mermaid { margin: 1.5rem 0; }
+  </style>
+</head>
+<body>
+  <h1>Overview: What we are doing</h1>
+  <div class="mermaid">
+flowchart LR
+  subgraph task [Same task]
+    CONV[One CONV layer]
+  end
+  subgraph styles [Three accelerator styles]
+    OS[Output-stationary ShiDianNao]
+    WS[Weight-stationary NVDLA]
+    RS[Row-stationary Eyeriss]
+  end
+  subgraph tools [Two tools]
+    M[MAESTRO]
+    T[Timeloop]
+  end
+  CONV --> OS
+  CONV --> WS
+  CONV --> RS
+  OS --> M
+  OS --> T
+  WS --> M
+  WS --> T
+  RS --> M
+  RS --> T
+  M --> Numbers[Latency and energy]
+  T --> Numbers
+  </div>
+
+  <h1>Overview: Who stays in the PE?</h1>
+  <div class="mermaid">
+flowchart TB
+  subgraph legend [Who stays in the PE?]
+    A[Output-stationary: outputs stay]
+    B[Weight-stationary: weights stay]
+    C[Row-stationary: a row of work stays]
+  end
+  subgraph names [Real accelerators]
+    A --> Shidian[ShiDianNao]
+    B --> NVDLA[NVDLA]
+    C --> Eyeriss[Eyeriss]
+  end
+  </div>
+
+  <h1>Overview: Full pipeline</h1>
+  <div class="mermaid">
+flowchart TB
+  A[Clone MAESTRO and Timeloop] --> B[Build MAESTRO: scons]
+  B --> C[Run run_maestro.sh]
+  B --> D[Run run_timeloop.sh]
+  C --> E[parse_maestro.py]
+  D --> F[parse_timeloop.py]
+  E --> G[plot_results.py]
+  F --> G
+  G --> H[summary_table.csv and PNG plots]
+  </div>
+
+  <h1>Part 1: Convolution and tensors</h1>
+  <div class="mermaid">
+flowchart LR
+  subgraph tensors [Tensors]
+    In[Inputs N C H W]
+    W[Weights K C R S]
+    Out[Outputs N K P Q]
+  end
+  subgraph op [Convolution]
+    MAC[MAC ops]
+  end
+  In --> MAC
+  W --> MAC
+  MAC --> Out
+  </div>
+
+  <h1>Part 2.1: Output-stationary (ShiDianNao)</h1>
+  <div class="mermaid">
+flowchart TB
+  subgraph os [Output-stationary]
+    direction TB
+    P1[PE 1: holds partial sum O1]
+    P2[PE 2: holds partial sum O2]
+    P3[PE N: holds partial sum ON]
+  end
+  W_stream[Weights stream in]
+  I_stream[Inputs stream in]
+  W_stream --> P1
+  W_stream --> P2
+  W_stream --> P3
+  I_stream --> P1
+  I_stream --> P2
+  I_stream --> P3
+  P1 --> acc1[Accumulate in place]
+  P2 --> acc2[Accumulate in place]
+  P3 --> acc3[Accumulate in place]
+  </div>
+
+  <h1>Part 2.2: Weight-stationary (NVDLA)</h1>
+  <div class="mermaid">
+flowchart TB
+  subgraph ws [Weight-stationary]
+    direction TB
+    P1[PE 1: holds weights W1]
+    P2[PE 2: holds weights W2]
+    P3[PE N: holds weights WN]
+  end
+  I_stream[Inputs stream in]
+  O_stream[Partial sums stream in/out]
+  I_stream --> P1
+  I_stream --> P2
+  I_stream --> P3
+  P1 --> O_stream
+  P2 --> O_stream
+  P3 --> O_stream
+  </div>
+
+  <h1>Part 2.3: Row-stationary (Eyeriss)</h1>
+  <div class="mermaid">
+flowchart TB
+  subgraph rs [Row-stationary]
+    direction TB
+    subgraph row [One row of PEs]
+      PE1[PE]
+      PE2[PE]
+      PE3[PE]
+    end
+    filter_row[One filter row]
+    input_row[One input row]
+    psum_row[Partial sum row]
+  end
+  filter_row --> row
+  input_row --> row
+  row --> psum_row
+  </div>
+
+  <h1>All three dataflows and loop order</h1>
+  <div class="mermaid">
+flowchart TB
+  subgraph legend [What stays in PE]
+    OS[Output-stationary: Outputs]
+    WS[Weight-stationary: Weights]
+    RS[Row-stationary: Row of work]
+  end
+  subgraph os_loop [OS: inner R,S,C outer P,Q,K]
+    os_inner[Inner: R S C]
+    os_outer[Outer: P Q K]
+  end
+  subgraph ws_loop [WS: inner P,Q outer K,C,R,S]
+    ws_inner[Inner: P Q]
+    ws_outer[Outer: K C R S]
+  end
+  subgraph rs_loop [RS: row R, spatial Q]
+    rs_inner[Row: R S]
+    rs_spatial[Spatial: Q]
+  end
+  OS --> os_loop
+  WS --> ws_loop
+  RS --> rs_loop
+  </div>
+
+  <h1>Mindmap: Dataflow comparison project</h1>
+  <div class="mermaid">
+mindmap
+  root((Dataflow comparison))
+    Dataflows
+      Output-stationary
+        ShiDianNao
+        Psum in PE
+      Weight-stationary
+        NVDLA
+        Weights in PE
+      Row-stationary
+        Eyeriss
+        Row reuse
+    Frameworks
+      MAESTRO
+        Mapping .m
+        HW .m
+      Timeloop
+        Arch YAML
+        Problem YAML
+    Outputs
+      Latency cycles
+      Energy
+      Plots
+  </div>
+
+  <h1>Part 6: Dataflow decision view</h1>
+  <div class="mermaid">
+flowchart TD
+  subgraph choice [Choose dataflow by what you want to reuse most]
+    A[Maximize output reuse]
+    B[Maximize weight reuse]
+    C[Balance reuse row-wise]
+  end
+  A --> OS[Output-stationary]
+  B --> WS[Weight-stationary]
+  C --> RS[Row-stationary]
+  OS --> Shidian[ShiDianNao-style]
+  WS --> NVDLA[NVDLA-style]
+  RS --> Eyeriss[Eyeriss-style]
+  subgraph impl [Implement in]
+    M[MAESTRO: Dataflow directives]
+    T[Timeloop: Arch + mapping YAML]
+  end
+  Shidian --> M
+  Shidian --> T
+  NVDLA --> M
+  NVDLA --> T
+  Eyeriss --> M
+  Eyeriss --> T
+  </div>
+
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+  </script>
+</body>
+</html>

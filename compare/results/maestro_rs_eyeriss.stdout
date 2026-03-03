@@ -1,0 +1,88 @@
+
+
+
+Num MACs: 107495424
+
+[Performance Analysis]
+Runtime: 1382402 cycles
+Throughput: 77.7599 MACs/cycle
+[Buffer Access Analysis]
+Tensor input
+L2 size requirement: 2304
+L1 size requirement: 24
+L2 buffer write: 200704
+L2 buffer read: 50493456
+L1 buffer write: 50493456
+L1 buffer read: 107495424
+Data reuse factor: 2.1289
+Tensor filter
+L2 size requirement: 144
+L1 size requirement: 48
+L2 buffer write: 36864
+L2 buffer read: 3973608
+L1 buffer write: 3973608
+L1 buffer read: 107495424
+Data reuse factor: 27.0523
+Tensor output
+L2 size requirement: 128
+L1 size requirement: 12
+L2 buffer write: 2985984
+L2 buffer read: 186624
+L1 buffer write: 107495424
+L1 buffer read: 107495424
+Data reuse factor: 1
+Overall data reuse factor: 1.99112
+[Energy Analysis]
+-For each data class
+Tensor input
+L2 buffer write energy: 3.7351e+06 X MAC energy
+L2 buffer read energy: 9.39683e+08 X MAC energy
+L1 buffer write energy: 8.4829e+07 X MAC energy
+L1 buffer read energy: 1.80592e+08 X MAC energy
+Tensor filter
+L2 buffer write energy: 686039 X MAC energy
+L2 buffer read energy: 7.39488e+07 X MAC energy
+L1 buffer write energy: 6.67566e+06 X MAC energy
+L1 buffer read energy: 1.80592e+08 X MAC energy
+Tensor output
+L2 buffer write energy: 5.55692e+07 X MAC energy
+L2 buffer read energy: 3.47307e+06 X MAC energy
+L1 buffer write energy: 1.80592e+08 X MAC energy
+L1 buffer read energy: 1.80592e+08 X MAC energy
+
+[Summary]
+Total L2 buffer requirement: 2576
+Total L1 buffer requirement: 84
+Total L2 buffer write energy: 5.99903e+07 X MAC energy
+Total L2 buffer read energy: 1.01711e+09 X MAC energy
+Total L1 buffer write energy: 2.72097e+08 X MAC energy
+Total L1 buffer read energy: 5.41777e+08 X MAC energy
+Total MAC energy: 107495424 X MAC energy
+Peak bandwidth requirement: 48
+Avg bandwidth requirement: 39.4002
+
+Total energy consumption: 1.99846e+09 X MAC energy
+Runtime: 1382402 cycles
+Throughput: 77.7599 MACs/cycle
+Performance per MAC energy: 3.89098e-08 MACs/cycle/(MAC_energy)
+Ingress Delay
+Min: 1
+Max: 2
+Avg: 1
+Egress Delay
+Min: 1
+Max: 1
+Avg: 1
+Computation Delay
+Min: 25
+Max: 25
+Avg: 25
+Average number of utilized PEs: 81
+Arithmetic intensity: 1.88235
+Buffer Analysis:
+[PASS]
+[Model-wise Buffer Summary]
+Model-wise total L2 size usage: 2576
+Model-wise total L1 size usage: 84
+BW Analysis:
+[PASS]

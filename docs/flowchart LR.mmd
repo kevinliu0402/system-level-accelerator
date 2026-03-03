@@ -1,0 +1,13 @@
+flowchart LR
+  subgraph OS[Output-stationary]
+    O1[PE keeps output]
+    O2[Weights and inputs stream]
+  end
+  subgraph WS[Weight-stationary]
+    W1[PE keeps weights]
+    W2[Inputs and outputs stream]
+  end
+  subgraph RS[Row-stationary]
+    R1[PE keeps row of filter and input]
+    R2[Outputs accumulate then move]
+  end

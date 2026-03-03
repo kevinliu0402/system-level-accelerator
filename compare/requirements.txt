@@ -1,0 +1,2 @@
+# For compare/plot_results.py
+matplotlib>=3.5.0
