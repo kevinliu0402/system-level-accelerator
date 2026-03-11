@@ -1,4 +1,4 @@
 dataflow,framework,latency_cycles,energy_uj,utilization_pct
 ShiDianNao_OS,Timeloop,115605504,1279.51,100.0
-NVDLA_WS,Timeloop,115605504,1279.51,100.0
-Eyeriss_RS,Timeloop,0,0,0
+NVDLA_WS,Timeloop,115605504,1965.53,100.0
+Eyeriss_RS,Timeloop,115605504,1965.53,100.0

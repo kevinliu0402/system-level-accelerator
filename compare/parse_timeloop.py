@@ -1,20 +1,27 @@
 #!/usr/bin/env python3
 """
-Parse Timeloop stats.txt for Cycles, Energy (uJ), Utilization.
-Writes compare/results/results_timeloop.csv
+Parse Timeloop stats files (OS, WS, RS) into compare/results/results_timeloop.csv.
+Looks for: compare/results/timeloop_os_shidiannao.stats.txt, timeloop_ws_nvdla.stats.txt,
+           timeloop_rs_eyeriss.stats.txt
 """
-import re
 import os
+import re
 import csv
 
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), "results")
 CSV_OUT = os.path.join(RESULTS_DIR, "results_timeloop.csv")
 
-def parse_stats(path: str) -> dict:
-    out = {"latency_cycles": None, "energy_uj": None, "utilization_pct": None}
+FILES = [
+    ("os_shidiannao", "ShiDianNao_OS"),
+    ("ws_nvdla", "NVDLA_WS"),
+    ("rs_eyeriss", "Eyeriss_RS"),
+]
+
+def parse_stats(path):
+    out = {"latency_cycles": 0, "energy_uj": 0.0, "utilization_pct": 0.0}
     if not os.path.isfile(path):
         return out
-    with open(path, "r") as f:
+    with open(path) as f:
         text = f.read()
     m = re.search(r"Cycles:\s*(\d+)", text)
     if m:
@@ -30,19 +37,15 @@ def parse_stats(path: str) -> dict:
 def main():
     os.makedirs(RESULTS_DIR, exist_ok=True)
     rows = []
-    for name, dataflow in [
-        ("os_shidiannao", "ShiDianNao_OS"),
-        ("ws_nvdla", "NVDLA_WS"),
-        ("rs_eyeriss", "Eyeriss_RS"),
-    ]:
-        path = os.path.join(RESULTS_DIR, f"timeloop_{name}.stats.txt")
-        parsed = parse_stats(path)
+    for stem, dataflow in FILES:
+        path = os.path.join(RESULTS_DIR, f"timeloop_{stem}.stats.txt")
+        p = parse_stats(path)
         rows.append({
             "dataflow": dataflow,
             "framework": "Timeloop",
-            "latency_cycles": parsed["latency_cycles"] or 0,
-            "energy_uj": parsed["energy_uj"] or 0,
-            "utilization_pct": parsed["utilization_pct"] or 0,
+            "latency_cycles": p["latency_cycles"],
+            "energy_uj": p["energy_uj"],
+            "utilization_pct": p["utilization_pct"],
         })
     with open(CSV_OUT, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["dataflow", "framework", "latency_cycles", "energy_uj", "utilization_pct"])

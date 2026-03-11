@@ -1,0 +1,10 @@
+# Output-stationary (ShiDianNao-style) for same layer
+mapping:
+  - target: MainMemory
+    type: temporal
+    factors: [N=1, M=64, C=64, R=1, S=1, P=56, Q=56]
+    permutation: [N, M, P, Q, C, R, S]
+  - target: Buffer
+    type: temporal
+    factors: [N=1, M=1, C=1, R=3, S=3, P=1, Q=1]
+    permutation: [C, R, S, N, M, P, Q]

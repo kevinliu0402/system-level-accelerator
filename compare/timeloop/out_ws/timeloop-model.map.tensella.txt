@@ -1,0 +1,6 @@
+t1
+C 64 M 64 R 3 S 3 N 1 P 56 Q 56 
+CRSMPQ
+t0
+C 1 M 1 R 1 S 1 N 1 P 1 Q 1 
+Q

@@ -1,0 +1,35 @@
+# 256-PE architecture (16x16) to match MAESTRO. v0.4 format for timeloopfe.
+architecture:
+  version: 0.4
+  nodes:
+  - !Container
+    name: System
+    attributes:
+      technology: "40nm"
+      global_cycle_seconds: 1e-9
+
+  - !Component
+    name: MainMemory
+    class: SRAM
+    attributes:
+      depth: 65536
+      width: 64
+      datawidth: 8
+
+  - !Container
+    name: PE
+    spatial: {meshX: 16, meshY: 16}
+
+  - !Component
+    name: Buffer
+    class: regfile
+    attributes:
+      depth: 64
+      width: 8
+      datawidth: 8
+
+  - !Component
+    name: MACC
+    class: intmac
+    attributes:
+      width: 8

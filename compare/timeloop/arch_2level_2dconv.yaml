@@ -1,0 +1,31 @@
+# 2-level (1 PE) for same-layer runs. MainMemory depth 65536 to avoid capacity error.
+architecture:
+  version: 0.4
+  nodes:
+  - !Container
+    name: System
+    attributes:
+      technology: "40nm"
+      global_cycle_seconds: 1e-9
+
+  - !Component
+    name: MainMemory
+    class: SRAM
+    attributes:
+      depth: 65536
+      width: 64
+      datawidth: 8
+
+  - !Component
+    name: Buffer
+    class: regfile
+    attributes:
+      depth: 64
+      width: 8
+      datawidth: 8
+
+  - !Component
+    name: MACC
+    class: intmac
+    attributes:
+      width: 8
