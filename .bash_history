@@ -230,3 +230,35 @@ python3 compare/parse_maestro.py
 cd ..
 python3 compare/parse_maestro.py
 python3 compare/parse_maestro.py && python3 compare/parse_timeloop.py && python3 compare/plot_results.py
+ls
+./compare/timeloop/run_timeloop_same_layer_rs_docker.sh
+cd /home/esp2026/kl3755
+./compare/timeloop/run_timeloop_same_layer_rs_docker.sh
+mv compare/results/timeloop_rs_eyeriss.stats.txt.bak compare/results/timeloop_rs_eyeriss.stats.txt
+python3 compare/parse_timeloop.py
+cd /home/esp2026/kl3755/system-level-accelerator
+mv /home/esp2026/kl3755/compare/results/timeloop_rs_eyeriss.stats.txt.bak    /home/esp2026/kl3755/compare/results/timeloop_rs_eyeriss.stats.txt
+python3 /home/esp2026/kl3755/compare/parse_timeloop.py
+python3 /home/esp2026/kl3755/compare/plot_results.py
+cd ..
+ls
+cd kl375
+cd kl3755
+git checkout HEAD -- compare/timeloop compare/parse_timeloop.py
+./compare/timeloop/run_timeloop.sh
+docker pull timeloopaccelergy/timeloop-accelergy-pytorch:latest-amd64
+docker run --rm -it   -v /home/esp2026/kl3755:/home/repo   -w /home/repo   timeloopaccelergy/timeloop-accelergy-pytorch:latest-amd64   bash
+git status
+python3 compare/plot_results.py
+git status
+git commit -m "0311"
+git push
+git checkout -b update-comparison
+git push -u origin update-comparison
+git status
+ls
+ls docs
+cd /home/esp2026/kl3755/docs
+ls
+/home/esp2026/kl3755/docs/midterm_presentation.md
+ls

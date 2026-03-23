@@ -1,0 +1,33 @@
+\begin{thebibliography}{1}
+
+\bibitem{maestro2019micro}
+Hyoukjun Kwon, Prasanth Chatarasi, Michael Pellauer, Angshuman Parashar, Vivek
+  Sarkar, and Tushar Krishna.
+\newblock Understanding reuse, performance, and hardware cost of dnn dataflows:
+  A data-centric approach.
+\newblock In {\em Proceedings of the 52nd Annual IEEE/ACM International
+  Symposium on Microarchitecture (MICRO)}, pages 754--768. ACM, 2019.
+
+\bibitem{timeloop2019ispass}
+Angshuman Parashar, Priyanka Raina, Yakun~Sophia Shao, Yu-Hsin Chen, Victor~A.
+  Ying, Anurag Mukkara, Rangharajan Venkatesan, Brucek Khailany, Stephen~W.
+  Keckler, and Joel Emer.
+\newblock Timeloop: A systematic approach to dnn accelerator evaluation.
+\newblock In {\em 2019 IEEE International Symposium on Performance Analysis of
+  Systems and Software (ISPASS)}, pages 304--315, 2019.
+
+\bibitem{scar2024micro}
+Mohanad Odema, Luke Chen, Hyoukjun Kwon, and Mohammad Abdullah~Al Faruque.
+\newblock Scar: Scheduling multi-model ai workloads on heterogeneous
+  multi-chiplet module accelerators.
+\newblock In {\em 2024 57th IEEE/ACM International Symposium on
+  Microarchitecture (MICRO)}, pages 565--579, 2024.
+
+\bibitem{magma2022hpca}
+Sheng-Chun Kao and Tushar Krishna.
+\newblock Magma: An optimization framework for mapping multiple dnns on
+  multiple accelerator cores.
+\newblock In {\em 2022 IEEE International Symposium on High-Performance
+  Computer Architecture (HPCA)}, 2022.
+
+\end{thebibliography}
