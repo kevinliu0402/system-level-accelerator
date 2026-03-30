@@ -18,32 +18,34 @@
 ///////////////////////////////////
 
 // some starting parameters that you should set
-// this is *your* processor, you decide these values
+// this is *your* processor, you decide these values (try analyzing which is best!)
 
-// superscalar width
-`define N 1
+// superscalar width (Milestone 2: 2-wide issue/rename)
+`define N 2
 
 // sizes
-`define ROB_SZ 16
-`define RS_SZ 16
+`define ROB_SZ 8
+`define RS_SZ 4
 `define PHYS_REG_SZ (32 + `ROB_SZ)
 
 // worry about these later
-`define BRANCH_PRED_SZ 128
-`define LSQ_SZ 8
+`define BRANCH_PRED_SZ 8
+`define LSQ_SZ 4
 
-// functional units
-`define NUM_FU_ALU 2
+// functional units (you should decide if you want more or fewer types of FUs)
+`define NUM_FU_ALU 1
 `define NUM_FU_MULT 1
-`define NUM_FU_LOAD 2
+`define NUM_FU_LOAD 1
 `define NUM_FU_STORE 1
 
-// number of mult stages
+// number of mult stages (2, 4, or 8)
 `define MULT_STAGES 4
 
 ///////////////////////////////
 // ---- Basic Constants ---- //
 ///////////////////////////////
+
+// NOTE: the global CLOCK_PERIOD is defined in the Makefile
 
 // useful boolean single-bit definitions
 `define FALSE 1'h0
@@ -53,9 +55,11 @@
 `define XLEN 32
 
 // the zero register
+// In RISC-V, any read of this register returns zero and any writes are thrown away
 `define ZERO_REG 5'd0
 
-// Basic NOP instruction.
+// Basic NOP instruction. Allows pipline registers to clearly be reset with
+// an instruction that does nothing instead of Zero which is really an ADDI x0, x0, 0
 `define NOP 32'h00000013
 
 //////////////////////////////////
@@ -68,7 +72,10 @@
 // Notably, you can no longer write data without first reading.
 `define CACHE_MODE
 
-
+// you are not allowed to change this definition for your final processor
+// the project 3 processor has a massive boost in performance just from having no mem latency
+// see if you can beat it's CPI in project 4 even with a 100ns latency!
+// `define MEM_LATENCY_IN_CYCLES  0
 `define MEM_LATENCY_IN_CYCLES (100.0/`CLOCK_PERIOD+0.49999)
 // the 0.49999 is to force ceiling(100/period). The default behavior for
 // float to integer conversion is rounding to nearest
@@ -260,6 +267,13 @@ typedef enum logic [4:0] {
 ////////////////////////////////
 // ---- Datapath Packets ---- //
 ////////////////////////////////
+
+/**
+ * Packets are used to move many variables between modules with
+ * just one datatype, but can be cumbersome in some circumstances.
+ *
+ * Define new ones in project 4 at your own discretion
+ */
 
 /**
  * IF_ID Packet:
