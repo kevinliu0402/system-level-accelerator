@@ -6,7 +6,9 @@ Run three 2-core combinations:
   - WS with OS
 
 You must provide req_bw for each dataflow (units: same as total_bw).
-Latency is taken from compare/results/summary_table.csv (Timeloop by default).
+Latency (no-stall L) is taken from compare/results/summary_table.csv.
+Default framework is MAESTRO so L differs per dataflow; override with
+LATENCY_FRAMEWORK=Timeloop if needed.
 """
 
 from __future__ import annotations
@@ -14,7 +16,7 @@ from __future__ import annotations
 import csv
 import os
 import sys
-from typing import Dict, Tuple
+from typing import Dict
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if REPO not in sys.path:
@@ -26,7 +28,7 @@ from compare.system_model.magma_bw_allocator import bw_allocator, make_two_core_
 SUMMARY = os.path.join(REPO, "compare", "results", "summary_table.csv")
 
 
-def load_latencies(framework: str = "Timeloop") -> Dict[str, float]:
+def load_latencies(framework: str = "MAESTRO") -> Dict[str, float]:
     """Return latency_cycles by dataflow for a given framework."""
     out: Dict[str, float] = {}
     with open(SUMMARY, "r") as f:
@@ -46,14 +48,15 @@ def main():
         "NVDLA_WS": float(os.environ.get("REQ_BW_WS", "200.0")),
         "Eyeriss_RS": float(os.environ.get("REQ_BW_RS", "80.0")),
     }
-    lat = load_latencies("Timeloop")
+    framework = os.environ.get("LATENCY_FRAMEWORK", "MAESTRO")
+    lat = load_latencies(framework)
     combos = [
         ("ShiDianNao_OS", "Eyeriss_RS"),
         ("Eyeriss_RS", "NVDLA_WS"),
         ("NVDLA_WS", "ShiDianNao_OS"),
     ]
 
-    print(f"Using {SUMMARY}")
+    print(f"Using {SUMMARY} (latency_rows={framework})")
     print(f"total_bw={total_bw}")
     print(f"req_bw={req_bw}")
     print("")
