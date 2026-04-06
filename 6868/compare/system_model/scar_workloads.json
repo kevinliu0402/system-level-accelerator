@@ -1,0 +1,91 @@
+{
+  "description": "SCAR (MICRO 2024, arXiv:2405.00790) evaluates ten multi-model scenarios: five inspired by MLPerf Inference (datacenter multi-tenancy) and five by XRBench (AR/VR edge). This file is a course-scale CNN subset using only models with MAESTRO CSVs in-tree (ResNet-50, MobileNetV2). It is representative, not a full reproduction of SCAR's suites (which also include LLMs and XR pipelines).",
+  "reference": "https://arxiv.org/abs/2405.00790",
+  "scenarios": [
+    {
+      "id": "DC_A",
+      "domain": "datacenter_multitenancy",
+      "note": "Two CNNs of different scales sharing bandwidth (MLPerf-style diversity, simplified).",
+      "jobs": [
+        {
+          "network": "resnet50",
+          "layer": "CONV3_1_2",
+          "dataflow": "Eyeriss_RS"
+        },
+        {
+          "network": "mobilenet_v2",
+          "layer": "Bottleneck2_1_2",
+          "dataflow": "NVDLA_WS"
+        }
+      ]
+    },
+    {
+      "id": "DC_B",
+      "domain": "datacenter_multitenancy",
+      "note": "Both jobs use WS-style NVDLA mapping on different networks.",
+      "jobs": [
+        {
+          "network": "resnet50",
+          "layer": "CONV2_1_2",
+          "dataflow": "NVDLA_WS"
+        },
+        {
+          "network": "mobilenet_v2",
+          "layer": "Bottleneck3_1_2",
+          "dataflow": "NVDLA_WS"
+        }
+      ]
+    },
+    {
+      "id": "DC_C",
+      "domain": "datacenter_multitenancy",
+      "note": "Heterogeneous dataflows on ResNet-50 layers (SCAR motivation: different layers favor different dataflows).",
+      "jobs": [
+        {
+          "network": "resnet50",
+          "layer": "CONV2_1_2",
+          "dataflow": "NVDLA_WS"
+        },
+        {
+          "network": "resnet50",
+          "layer": "CONV4_1_2",
+          "dataflow": "ShiDianNao_OS"
+        }
+      ]
+    },
+    {
+      "id": "EDGE_A",
+      "domain": "ar_vr_edge",
+      "note": "XRBench-style edge: smaller MobileNet stage + early ResNet stage (latency-friendly pair).",
+      "jobs": [
+        {
+          "network": "mobilenet_v2",
+          "layer": "Bottleneck1_1_2",
+          "dataflow": "NVDLA_WS"
+        },
+        {
+          "network": "resnet50",
+          "layer": "CONV2_1_2",
+          "dataflow": "ShiDianNao_OS"
+        }
+      ]
+    },
+    {
+      "id": "EDGE_B",
+      "domain": "ar_vr_edge",
+      "note": "Deeper layers, higher BW demand on one path (stress shared DRAM).",
+      "jobs": [
+        {
+          "network": "resnet50",
+          "layer": "CONV3_1_2",
+          "dataflow": "Eyeriss_RS"
+        },
+        {
+          "network": "mobilenet_v2",
+          "layer": "Bottleneck4_1_2",
+          "dataflow": "NVDLA_WS"
+        }
+      ]
+    }
+  ]
+}

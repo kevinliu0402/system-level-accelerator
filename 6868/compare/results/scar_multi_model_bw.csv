@@ -1,0 +1,6 @@
+scenario_id,domain,makespan,bw_util,job0,job1
+DC_A,datacenter_multitenancy,185258.791260,1.000000,resnet50/CONV3_1_2/Eyeriss_RS,mobilenet_v2/Bottleneck2_1_2/NVDLA_WS
+DC_B,datacenter_multitenancy,146401.493000,0.682134,resnet50/CONV2_1_2/NVDLA_WS,mobilenet_v2/Bottleneck3_1_2/NVDLA_WS
+DC_C,datacenter_multitenancy,1310721.000000,0.284510,resnet50/CONV2_1_2/NVDLA_WS,resnet50/CONV4_1_2/ShiDianNao_OS
+EDGE_A,ar_vr_edge,1096858.327201,0.634006,mobilenet_v2/Bottleneck1_1_2/NVDLA_WS,resnet50/CONV2_1_2/ShiDianNao_OS
+EDGE_B,ar_vr_edge,171770.387620,1.000000,resnet50/CONV3_1_2/Eyeriss_RS,mobilenet_v2/Bottleneck4_1_2/NVDLA_WS

@@ -74,6 +74,8 @@ print(est.total_cycles, est.note)
 
 - Single DRAM pipe; no detailed bank-level or row-buffer model.
 - NoC is one aggregate bandwidth; no topology, no routing contention.
-- No multi-workload scheduling (see SCAR for scheduling ideas).
+- No multi-workload scheduling in `noc_dram.py` (see SCAR for scheduling ideas).
+
+**Update — SCAR-style multi-model CNN workloads:** Under `compare/system_model/`, see `scar_workloads.json` and `run_scar_multi_model_bw.py` for two concurrent jobs (different networks/layers/dataflows) on the shared MAGMA bandwidth allocator, with per-job `L` and `Avg BW Req` from MAESTRO CSV rows. This is a **small CNN subset** inspired by SCAR’s MLPerf + XRBench methodology, not a full reproduction of their ten scenarios.
 
 These match the proposal’s scope: **early-stage exploration**, not RTL-accurate modeling.
