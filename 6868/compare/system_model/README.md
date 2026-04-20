@@ -19,7 +19,7 @@ Instead of a constant bandwidth, the script uses **three numbers**—one per dat
 
 **Which row?** Environment variable **`BW_LAYER`** picks **one** ResNet-50 **layer name** (e.g. `CONV2_1_2`) so all three CSVs use the **same layer** for a fair comparison.
 
-**Not the full network:** Each run uses **a single layer’s** `Avg BW Req` triple. There is no built-in “run all layers / entire structure” mode—repeat with different `BW_LAYER` values (see the loop below) if you want a sweep.
+**Single-layer default:** Each run uses **one** layer’s `Avg BW Req` triple. For the **full ResNet-50 layer list** with **per-layer** MAESTRO `Runtime` + `Avg BW Req`, use **`run_bw_combos_full_network.py`** (sums makespans layer-by-layer for each combo; see that file’s docstring).
 
 If `Resnet50_yxp_os_pe256.csv` is missing, OS temporarily reuses the RS CSV. 
 Generate the OS CSV with MAESTRO using mapping `Resnet50_yxp_os.m` and your PE config.
@@ -70,6 +70,73 @@ cd /path/to/6868/maestro
 cp Resnet50_yxp_os.csv tools/jupyter_notebook/data/Resnet50_yxp_os_pe256.csv
 ```
 
+## Full network (all ResNet-50 layers in MAESTRO CSV)
+
+Uses **per-layer** metrics from MAESTRO (not `summary_table.csv` latencies). Assumes layers run **serially**: each layer runs the 2-core combo to completion, then the next layer starts.
+
+```bash
+cd /path/to/6868
+python3 compare/system_model/run_bw_combos_full_network.py
+```
+
+**One combo only** (`OS_RS`, `RS_WS`, or `WS_OS`):
+
+```bash
+FULLNET_COMBO=RS_WS SYSTEM_BW=100 python3 compare/system_model/run_bw_combos_full_network.py
+```
+
+**Per-layer CSV:**
+
+```bash
+FULLNET_OUT_CSV=compare/results/full_net_bw_layers.csv \
+  python3 compare/system_model/run_bw_combos_full_network.py
+```
+
+### Full MobileNetV2 (all layers in `MobileNetV2_kcp_ws_pe256.csv`)
+
+Same serial full-network idea as ResNet-50. **Only the WS MAESTRO CSV exists** for MobileNetV2; OS/RS jobs reuse that file, so some two-core combos use **identical** `(L, bw_req)` on both cores—see the script banner.
+
+```bash
+cd /path/to/6868
+python3 compare/system_model/run_mobilenet_full_network_bw.py
+```
+
+```bash
+FULLNET_COMBO=RS_WS SYSTEM_BW=100 python3 compare/system_model/run_mobilenet_full_network_bw.py
+```
+
+```bash
+MOBILENET_FULLNET_OUT_CSV=compare/results/mobilenet_full_net_bw_layers.csv \
+  python3 compare/system_model/run_mobilenet_full_network_bw.py
+```
+
+(`FULLNET_OUT_CSV` is also accepted if `MOBILENET_FULLNET_OUT_CSV` is unset.)
+
+**Plot makespan** (`pip install matplotlib`):
+
+```bash
+python3 compare/system_model/visualize_makespan.py \
+  --csv compare/results/full_net_bw_layers.csv --out compare/results/makespan_resnet.png
+python3 compare/system_model/visualize_makespan.py \
+  --csv compare/results/full_net_bw_layers.csv --out compare/results/makespan_cum.png --cumulative
+python3 compare/system_model/visualize_makespan.py \
+  --csv compare/results/scar.csv --out compare/results/makespan_scar.png --mode scar
+```
+
+## Export ONNX (PyTorch / torchvision)
+
+Standard **ImageNet** weights → ONNX for ResNet-50 and MobileNet-V2 (for tooling / graph inspection; MAESTRO still uses its own `.m` mappings).
+
+```bash
+pip install torch torchvision onnx
+cd /path/to/6868
+python3 compare/scripts/export_resnet_mobilenet_onnx.py
+```
+
+Optional: `OUT_DIR=/path/to/out ONNX_OPSET=17 python3 compare/scripts/export_resnet_mobilenet_onnx.py`
+
+Default output: `compare/models/onnx/resnet50.onnx` and `mobilenet_v2.onnx`.
+
 ## SCAR-style multi-model CNN workloads (next step)
 
 [SCAR](https://arxiv.org/abs/2405.00790) (MICRO 2024) studies **multi-model** scheduling on heterogeneous MCM accelerators; evaluation uses **ten** scenarios (roughly: MLPerf-style datacenter multi-tenancy + XRBench-style AR/VR). You do **not** need to invent many new DNNs from scratch: the paper draws suites from **industry traces and benchmarks** (MLPerf, XRBench) and uses CNNs such as **ResNet-50** alongside heavier models.
@@ -95,4 +162,8 @@ SCAR_SCENARIO=DC_A SCAR_OUT_CSV=compare/results/scar_multi_model_bw.csv \
 - `magma_bw_allocator.py` — allocator logic  
 - `run_example.py` — smaller example of the API  
 - `noc_dram.py` — NoC/DRAM helpers (if used by your workflow)  
-- `scar_workloads.json`, `run_scar_multi_model_bw.py`, `maestro_layer_metrics.py` — SCAR-inspired multi-model runs
+- `scar_workloads.json`, `run_scar_multi_model_bw.py`, `maestro_layer_metrics.py` — SCAR-inspired multi-model runs  
+- `run_bw_combos_full_network.py` — full ResNet-50 layer sweep  
+- `run_mobilenet_full_network_bw.py` — full MobileNetV2 layer sweep (WS CSV proxy for OS/RS)  
+- `compare/scripts/export_resnet_mobilenet_onnx.py` — ONNX export  
+- `visualize_makespan.py` — plots from full-net or SCAR CSVs

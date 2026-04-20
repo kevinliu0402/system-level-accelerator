@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import csv
 import os
-from typing import Dict, Optional, Tuple
+from typing import Dict, List, Tuple
 
 # Project root = parent of compare/
 _REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -88,3 +88,31 @@ def resolve_os_csv_path() -> str:
     os_csv = os.path.join(_MAESTRO_DATA, "Resnet50_yxp_os_pe256.csv")
     rs_csv = os.path.join(_MAESTRO_DATA, "Resnet50_rs_pe256.csv")
     return os_csv if os.path.isfile(os_csv) else rs_csv
+
+
+def list_resnet50_layer_order() -> List[str]:
+    """Layer names in row order from Resnet50_rs_pe256.csv (full network list)."""
+    path = os.path.join(_MAESTRO_DATA, "Resnet50_rs_pe256.csv")
+    if not os.path.isfile(path):
+        raise FileNotFoundError(path)
+    out: List[str] = []
+    with open(path, "r") as f:
+        for r in csv.DictReader(f):
+            layer = _row_field(r, " Layer Number", "Layer Number")
+            if layer:
+                out.append(layer)
+    return out
+
+
+def list_mobilenet_v2_layer_order() -> List[str]:
+    """Layer names in row order from MobileNetV2_kcp_ws_pe256.csv."""
+    path = os.path.join(_MAESTRO_DATA, "MobileNetV2_kcp_ws_pe256.csv")
+    if not os.path.isfile(path):
+        raise FileNotFoundError(path)
+    out: List[str] = []
+    with open(path, "r") as f:
+        for r in csv.DictReader(f):
+            layer = _row_field(r, " Layer Number", "Layer Number")
+            if layer:
+                out.append(layer)
+    return out

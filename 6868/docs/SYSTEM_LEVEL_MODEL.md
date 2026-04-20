@@ -79,3 +79,13 @@ print(est.total_cycles, est.note)
 **Update — SCAR-style multi-model CNN workloads:** Under `compare/system_model/`, see `scar_workloads.json` and `run_scar_multi_model_bw.py` for two concurrent jobs (different networks/layers/dataflows) on the shared MAGMA bandwidth allocator, with per-job `L` and `Avg BW Req` from MAESTRO CSV rows. This is a **small CNN subset** inspired by SCAR’s MLPerf + XRBench methodology, not a full reproduction of their ten scenarios.
 
 These match the proposal’s scope: **early-stage exploration**, not RTL-accurate modeling.
+
+## Strong scaling vs weak scaling (parallel performance)
+
+These terms describe **how you grow the problem** when you add processors (or PEs/chiplets).
+
+**Strong scaling:** The **total problem size is fixed** (e.g. one ResNet-50 inference). You increase hardware (more cores / chiplets). Ideal speedup: time drops in proportion to resources. In practice, **communication**, **Amdahl serial fraction**, and **load imbalance** limit speedup.
+
+**Weak scaling:** The **work per processor stays roughly constant**; when you double processors, you **double the problem size** (e.g. double the batch or double concurrent models). Ideal outcome: **time per step stays flat** as you scale. Used to study whether the system **saturates** (memory bandwidth, NoC) when load grows with machine size.
+
+For this project, **shared DRAM / NoC caps** often show up as **poor strong scaling** (fixed inference hits a bandwidth wall) or **weak scaling** curves that **bend upward** once traffic exceeds the pipe.
