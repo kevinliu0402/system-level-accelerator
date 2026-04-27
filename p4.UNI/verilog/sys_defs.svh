@@ -140,6 +140,13 @@ typedef enum logic [3:0] {
     STORE_PAGE_FAULT    = 4'hf
 } EXCEPTION_CODE;
 
+// Memory op class carried in the ROB for Milestone 3 (LSQ / dcache integration)
+typedef enum logic [1:0] {
+    ROB_MEM_NONE  = 2'h0,
+    ROB_MEM_LOAD  = 2'h1,
+    ROB_MEM_STORE = 2'h2
+} ROB_MEM_OP;
+
 ///////////////////////////////////
 // ---- Instruction Typedef ---- //
 ///////////////////////////////////

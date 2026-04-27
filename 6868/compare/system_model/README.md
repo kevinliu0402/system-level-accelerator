@@ -157,6 +157,19 @@ SCAR_SCENARIO=DC_A SCAR_OUT_CSV=compare/results/scar_multi_model_bw.csv \
   SYSTEM_BW=256 python3 compare/system_model/run_scar_multi_model_bw.py
 ```
 
+## Greedy 4-chiplet schedule (SCAR-inspired, ResNet + MobileNet)
+
+Heterogeneous **four chiplets** (two **WS**, one **OS**, one **RS**), **two** single-stream networks (**ResNet-50**, **MobileNetV2**). Each step greedily picks a legal chiplet pair (or one chiplet when a network is finished) to minimize **completion time** under the **2-core MAGMA `bw_allocator`** with shared **`SYSTEM_BW`**.
+
+```bash
+cd /path/to/6868
+SYSTEM_BW=100 GREEDY4_OUT_CSV=compare/results/greedy_four_chiplet_schedule.csv \
+  python3 compare/system_model/run_greedy_four_chiplet.py
+python3 compare/system_model/visualize_greedy_four_chiplet.py \
+  --csv compare/results/greedy_four_chiplet_schedule.csv \
+  --out compare/results/greedy_four_chiplet.png
+```
+
 ## Plot layer results (`visualize_layer_results.py`)
 
 These commands expect your shell’s current directory to be the **`6868`** project root (paths to `--csv` / `--out` are relative to that directory):
@@ -193,4 +206,5 @@ LOOKUP_POLICY=min_makespan SYSTEM_BW=100 \
 - `run_mobilenet_full_network_bw.py` — full MobileNetV2 layer sweep (WS CSV proxy for OS/RS)  
 - `compare/scripts/export_resnet_mobilenet_onnx.py` — ONNX export  
 - `visualize_makespan.py` — plots from full-net or SCAR CSVs  
-- `build_layer_lookup.py`, `visualize_layer_results.py` — per-layer best-accelerator table + plots (`lookup` / `traffic`)
+- `build_layer_lookup.py`, `visualize_layer_results.py` — per-layer best-accelerator table + plots (`lookup` / `traffic`)  
+- `run_greedy_four_chiplet.py`, `visualize_greedy_four_chiplet.py` — greedy 4-chiplet (2×WS, OS, RS) schedule + plot

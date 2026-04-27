@@ -38,7 +38,10 @@ def run_layer_combo(layer: str, pair: Tuple[str, str], total_bw: float):
     L0, bw0, _, _ = layer_latency_and_bw_req("mobilenet_v2", layer, a)
     L1, bw1, _, _ = layer_latency_and_bw_req("mobilenet_v2", layer, b)
     q = make_two_core_combo(a, L0, bw0, b, L1, bw1)
-    return bw_allocator(q, total_bw)
+    res = bw_allocator(q, total_bw)
+    traffic0 = L0 * bw0
+    traffic1 = L1 * bw1
+    return res, L0, bw0, traffic0, L1, bw1, traffic1
 
 
 def main() -> None:
@@ -72,16 +75,25 @@ def main() -> None:
     for combo_name, pair in pairs:
         acc = 0.0
         util_area = 0.0
+        traffic_sum = 0.0
         for layer in layers:
-            res = run_layer_combo(layer, pair, total_bw)
+            res, L0, bw0, tr0, L1, bw1, tr1 = run_layer_combo(layer, pair, total_bw)
             acc += res.makespan
             util_area += res.bw_util * res.makespan
+            traffic_sum += (tr0 + tr1)
             rows_for_csv.append(
                 {
                     "combo": combo_name,
                     "layer": layer,
                     "makespan": res.makespan,
                     "bw_util": res.bw_util,
+                    "core0_latency_cycles": L0,
+                    "core0_avg_bw_req": bw0,
+                    "core0_traffic": tr0,
+                    "core1_latency_cycles": L1,
+                    "core1_avg_bw_req": bw1,
+                    "core1_traffic": tr1,
+                    "total_traffic": tr0 + tr1,
                 }
             )
         avg_util = util_area / acc if acc > 0 else 0.0
@@ -89,6 +101,7 @@ def main() -> None:
         print(f"  serial_full_net_makespan_sum: {acc:,.0f}")
         print(f"  layer_count: {len(layers)}")
         print(f"  bw_util weighted by layer makespan: {avg_util*100:.2f}%")
+        print(f"  total_traffic_sum (AvgBWReq*Runtime): {traffic_sum:,.3e}")
         print("")
 
     if out_csv:
@@ -96,7 +109,22 @@ def main() -> None:
         if parent:
             os.makedirs(parent, exist_ok=True)
         with open(out_csv, "w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=["combo", "layer", "makespan", "bw_util"])
+            w = csv.DictWriter(
+                f,
+                fieldnames=[
+                    "combo",
+                    "layer",
+                    "makespan",
+                    "bw_util",
+                    "core0_latency_cycles",
+                    "core0_avg_bw_req",
+                    "core0_traffic",
+                    "core1_latency_cycles",
+                    "core1_avg_bw_req",
+                    "core1_traffic",
+                    "total_traffic",
+                ],
+            )
             w.writeheader()
             w.writerows(rows_for_csv)
         print(f"Wrote {out_csv}")
