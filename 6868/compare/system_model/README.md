@@ -157,6 +157,32 @@ SCAR_SCENARIO=DC_A SCAR_OUT_CSV=compare/results/scar_multi_model_bw.csv \
   SYSTEM_BW=256 python3 compare/system_model/run_scar_multi_model_bw.py
 ```
 
+## Plot layer results (`visualize_layer_results.py`)
+
+These commands expect your shell’s current directory to be the **`6868`** project root (paths to `--csv` / `--out` are relative to that directory):
+
+```bash
+cd /path/to/6868
+python3 compare/system_model/visualize_layer_results.py --kind lookup \
+  --csv compare/results/layer_accel_lookup_resnet50.csv \
+  --out compare/results/plot_layer_lookup.png
+
+python3 compare/system_model/visualize_layer_results.py --kind traffic --combo OS_RS \
+  --csv compare/results/full_net_bw_layers.csv \
+  --out compare/results/plot_fullnet_traffic_OS_RS.png
+```
+
+The **traffic** figure uses three stacked panels: **allocator `makespan` + `bw_util`** (same MAGMA model as `visualize_makespan.py`), **per-layer MAESTRO `total_traffic` bars**, and **cumulative makespan vs cumulative traffic** (dual *y*). The **lookup** figure adds a **cumulative serial-time** panel: MAESTRO runtime sum for the chosen mapping and, when the CSV includes `*_makespan_cycles`, cumulative MAGMA makespan for the same choices under shared BW.
+
+**Lookup table (`build_layer_lookup.py`):** `LOOKUP_POLICY=min_latency` (default) picks the lowest MAESTRO runtime per layer with no bus contention. Use **`LOOKUP_POLICY=min_makespan`** with **`SYSTEM_BW`** and optional **`LOOKUP_PARTNER_DATAFLOW`** (default `Eyeriss_RS`) to score each core0 mapping by **MAGMA allocator makespan** for that layer versus a fixed partner on core1—so choices reflect slowdown when combined demand exceeds the shared cap. Regenerate the CSV, then point `visualize_layer_results.py --kind lookup` at it; plots auto-detect `*_makespan_cycles` columns and label axes accordingly.
+
+```bash
+cd /path/to/6868
+LOOKUP_POLICY=min_makespan SYSTEM_BW=100 \
+  LOOKUP_OUT_CSV=compare/results/layer_accel_lookup_resnet50_bw.csv \
+  python3 compare/system_model/build_layer_lookup.py
+```
+
 ## Related files
 
 - `magma_bw_allocator.py` — allocator logic  
@@ -166,4 +192,5 @@ SCAR_SCENARIO=DC_A SCAR_OUT_CSV=compare/results/scar_multi_model_bw.csv \
 - `run_bw_combos_full_network.py` — full ResNet-50 layer sweep  
 - `run_mobilenet_full_network_bw.py` — full MobileNetV2 layer sweep (WS CSV proxy for OS/RS)  
 - `compare/scripts/export_resnet_mobilenet_onnx.py` — ONNX export  
-- `visualize_makespan.py` — plots from full-net or SCAR CSVs
+- `visualize_makespan.py` — plots from full-net or SCAR CSVs  
+- `build_layer_lookup.py`, `visualize_layer_results.py` — per-layer best-accelerator table + plots (`lookup` / `traffic`)
