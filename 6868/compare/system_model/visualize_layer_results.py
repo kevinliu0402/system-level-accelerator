@@ -8,6 +8,8 @@ Kinds:
   traffic — from run_*_full_network*.py CSV: per-layer MAGMA allocator makespan + bw_util, MAESTRO
             total_traffic bars, and cumulative makespan (end-to-end under SYSTEM_BW used in the run).
 
+Optional: --drop-last-n N omits the last N layers from the figure only (CSV unchanged); the footer notes this.
+
 Install: pip install matplotlib
 
 Example (run from the 6868/ project root):
@@ -31,6 +33,18 @@ from collections import Counter
 from typing import Dict, List
 
 
+def _trim_rows(rows: List[dict], drop_last_n: int, label: str) -> List[dict]:
+    if drop_last_n <= 0:
+        return rows
+    if len(rows) <= drop_last_n:
+        print(
+            f"{label}: drop_last_n={drop_last_n} but only {len(rows)} row(s); keeping all.",
+            file=sys.stderr,
+        )
+        return rows
+    return rows[:-drop_last_n]
+
+
 def _require_matplotlib():
     try:
         import matplotlib.pyplot as plt  # noqa: F401
@@ -40,12 +54,13 @@ def _require_matplotlib():
         sys.exit(1)
 
 
-def plot_lookup(csv_path: str, out_path: str, title: str) -> None:
+def plot_lookup(csv_path: str, out_path: str, title: str, drop_last_n: int = 0) -> None:
     plt = _require_matplotlib()
     rows: List[dict] = []
     with open(csv_path, newline="") as f:
         for r in csv.DictReader(f):
             rows.append(r)
+    rows = _trim_rows(rows, drop_last_n, "plot_lookup")
 
     layers = [r["layer"] for r in rows]
     n_layers = len(layers)
@@ -169,6 +184,8 @@ def plot_lookup(csv_path: str, out_path: str, title: str) -> None:
             f"  |  partner={rows[0]['lookup_partner_dataflow']}"
             f"  SYSTEM_BW={rows[0].get('lookup_system_bw', '')}"
         )
+    if drop_last_n:
+        foot += f"  |  plot: last {drop_last_n} layer(s) omitted"
     fig.text(0.02, 0.01, foot, fontsize=8)
 
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
@@ -177,7 +194,7 @@ def plot_lookup(csv_path: str, out_path: str, title: str) -> None:
     print(f"Wrote {out_path}")
 
 
-def plot_traffic(csv_path: str, out_path: str, combo: str, title: str) -> None:
+def plot_traffic(csv_path: str, out_path: str, combo: str, title: str, drop_last_n: int = 0) -> None:
     plt = _require_matplotlib()
     rows: List[dict] = []
     with open(csv_path, newline="") as f:
@@ -187,6 +204,7 @@ def plot_traffic(csv_path: str, out_path: str, combo: str, title: str) -> None:
     if not rows:
         print(f"No rows for combo={combo!r} in {csv_path}", file=sys.stderr)
         sys.exit(1)
+    rows = _trim_rows(rows, drop_last_n, "plot_traffic")
 
     layers = [r["layer"] for r in rows]
     x = list(range(len(layers)))
@@ -276,11 +294,15 @@ def plot_traffic(csv_path: str, out_path: str, combo: str, title: str) -> None:
     ax_c.set_xticks(ticks)
     ax_c.set_xticklabels([layers[i] for i in ticks], rotation=70, ha="right", fontsize=6)
 
+    tail_note = (
+        f" Plot omitted last {drop_last_n} layer(s)." if drop_last_n else ""
+    )
     fig.text(
         0.02,
         0.01,
         "makespan/bw_util: MAGMA allocator when two MAESTRO jobs share SYSTEM_BW from the generator run. "
-        "total_traffic: per-layer demand (no allocator scaling).",
+        "total_traffic: per-layer demand (no allocator scaling)."
+        + tail_note,
         fontsize=7,
     )
     os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
@@ -303,12 +325,25 @@ def main() -> None:
     p.add_argument("--out", required=True)
     p.add_argument("--combo", default="OS_RS", help="traffic mode: combo name filter")
     p.add_argument("--title", default="")
+    p.add_argument(
+        "--drop-last-n",
+        type=int,
+        default=0,
+        metavar="N",
+        help="omit the last N layers from the plot (CSV unchanged)",
+    )
     args = p.parse_args()
 
     if args.kind == "lookup":
-        plot_lookup(args.csv, args.out, args.title)
+        plot_lookup(args.csv, args.out, args.title, drop_last_n=args.drop_last_n)
     else:
-        plot_traffic(args.csv, args.out, args.combo.strip(), args.title)
+        plot_traffic(
+            args.csv,
+            args.out,
+            args.combo.strip(),
+            args.title,
+            drop_last_n=args.drop_last_n,
+        )
 
 
 if __name__ == "__main__":

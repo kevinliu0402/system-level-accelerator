@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import csv
 import os
+import re
 from typing import Dict, List, Tuple
 
 # Project root = parent of compare/
@@ -28,6 +29,13 @@ MODEL_CSVS: Dict[str, Dict[str, str]] = {
         "NVDLA_WS": "MobileNetV2_kcp_ws_pe256.csv",
         "Eyeriss_RS": "MobileNetV2_kcp_ws_pe256.csv",
         "ShiDianNao_OS": "MobileNetV2_kcp_ws_pe256.csv",
+    },
+    # In-tree stub: layer names from MAESTRO mapping squeezenet1_0_kcp_ws.m; numeric rows
+    # cycled from MobileNetV2 WS export (NOT a real MAESTRO run for SqueezeNet).
+    "squeezenet1_0": {
+        "NVDLA_WS": "SqueezeNet1_0_kcp_ws_pe256.csv",
+        "Eyeriss_RS": "SqueezeNet1_0_kcp_ws_pe256.csv",
+        "ShiDianNao_OS": "SqueezeNet1_0_kcp_ws_pe256.csv",
     },
 }
 
@@ -72,7 +80,9 @@ def layer_latency_and_bw_req(
     elif not os.path.isfile(full):
         raise FileNotFoundError(f"Missing MAESTRO CSV: {full}")
 
-    proxied = net == "mobilenet_v2" and df != "NVDLA_WS"
+    proxied = (net == "mobilenet_v2" and df != "NVDLA_WS") or (
+        net == "squeezenet1_0" and df != "NVDLA_WS"
+    )
     r = _load_layer_row(full, layer)
 
     rt_raw = _row_field(r, "Runtime (Cycles)", " Runtime (Cycles)")
@@ -97,6 +107,82 @@ def list_resnet50_layer_order() -> List[str]:
         raise FileNotFoundError(path)
     out: List[str] = []
     with open(path, "r") as f:
+        for r in csv.DictReader(f):
+            layer = _row_field(r, " Layer Number", "Layer Number")
+            if layer:
+                out.append(layer)
+    return out
+
+
+def _squeezenet_layer_names_from_mapping() -> List[str]:
+    mpath = os.path.join(_REPO, "maestro", "data", "mapping", "squeezenet1_0_kcp_ws.m")
+    if not os.path.isfile(mpath):
+        raise FileNotFoundError(mpath)
+    names: List[str] = []
+    with open(mpath, "r") as f:
+        for line in f:
+            m = re.match(r"^\s*Layer\s+(\S+)\s*\{", line)
+            if m:
+                names.append(m.group(1))
+    if not names:
+        raise ValueError(f"No Layer entries parsed from {mpath}")
+    return names
+
+
+def ensure_squeezenet1_0_maestro_stub_csv() -> str:
+    """
+    Write SqueezeNet1_0_kcp_ws_pe256.csv if missing.
+
+    Layer order and names match ``squeezenet1_0_kcp_ws.m``. Each row's numeric metrics
+    are copied by cycling rows from ``MobileNetV2_kcp_ws_pe256.csv`` — useful only for
+    pipeline / allocator experiments until real MAESTRO exports exist.
+    """
+    out_path = os.path.join(_MAESTRO_DATA, "SqueezeNet1_0_kcp_ws_pe256.csv")
+    if os.path.isfile(out_path):
+        return out_path
+
+    mn_path = os.path.join(_MAESTRO_DATA, "MobileNetV2_kcp_ws_pe256.csv")
+    if not os.path.isfile(mn_path):
+        raise FileNotFoundError(f"Need {mn_path} to build SqueezeNet stub")
+
+    sq_layers = _squeezenet_layer_names_from_mapping()
+    with open(mn_path, newline="") as f:
+        mn_reader = csv.DictReader(f)
+        mn_fieldnames = mn_reader.fieldnames
+        if not mn_fieldnames:
+            raise ValueError("MobileNet CSV has no header")
+        mn_rows = list(mn_reader)
+    if not mn_rows:
+        raise ValueError("MobileNet CSV has no rows")
+
+    nn_key = "Neural Network Name" if "Neural Network Name" in mn_fieldnames else None
+    lyr_key = " Layer Number" if " Layer Number" in mn_fieldnames else "Layer Number"
+    if lyr_key not in mn_fieldnames:
+        raise KeyError(f"Expected layer column in MobileNet CSV: {mn_fieldnames}")
+
+    out_rows: List[dict] = []
+    for i, lyr in enumerate(sq_layers):
+        src = dict(mn_rows[i % len(mn_rows)])
+        if nn_key:
+            src[nn_key] = "SqueezeNet1_0"
+        src[lyr_key] = lyr
+        out_rows.append(src)
+
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    with open(out_path, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(mn_fieldnames), extrasaction="ignore")
+        w.writeheader()
+        for r in out_rows:
+            w.writerow(r)
+    return out_path
+
+
+def list_squeezenet1_0_layer_order() -> List[str]:
+    """Layer names for SqueezeNet1_0 (stub CSV created by ensure_squeezenet1_0_maestro_stub_csv)."""
+    ensure_squeezenet1_0_maestro_stub_csv()
+    path = os.path.join(_MAESTRO_DATA, "SqueezeNet1_0_kcp_ws_pe256.csv")
+    out: List[str] = []
+    with open(path, newline="") as f:
         for r in csv.DictReader(f):
             layer = _row_field(r, " Layer Number", "Layer Number")
             if layer:

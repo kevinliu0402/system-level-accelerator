@@ -262,3 +262,389 @@ cd /home/esp2026/kl3755/docs
 ls
 /home/esp2026/kl3755/docs/midterm_presentation.md
 ls
+Add NoCand shared DRAM models
+cd /home/esp2026/kl3755
+python3 compare/system_model/run_example.py
+python3 -c "
+from compare.system_model.noc_dram import AcceleratorTile, SystemConfig, estimate_multi_accelerator_system
+tiles = [
+    AcceleratorTile('tile0', latency_cycles=451584,
+        dram_bytes_read=1e8, dram_bytes_write=5e7,
+        noc_bytes_to_dram=1.5e8, noc_bytes_to_peer=0),
+]
+cfg = SystemConfig(clock_hz=1e9, dram_bandwidth_gbps=25, noc_bandwidth_gbps=100)
+e = estimate_multi_accelerator_system(tiles, cfg)
+print(e)
+"
+python3 compare/plot_results.py
+python3 compare/system_model/run_example.py
+git status
+git add -a
+git add -A
+git status
+git commit -m "0323"
+git push -u origin main
+git checkout -b update-comparison
+git push -u origin update-comparison
+git status
+ls
+python3 compare/system_model/run_example.py
+ls
+cd ..
+ls
+cd ..
+ls
+cd ..
+ls
+git clone git@github.com:CSEE4340-26/p4.UNI.git
+ls
+cd p4.UNI
+cd ..
+ls
+git clone git@github.com:CSEE4340-26/p4.UNI.git
+ls
+cd p4.UNI/
+ls
+git status
+git add verilog/sys_defs.svh 
+git add test/rob_test.sv 
+git add verilog/rob.sv 
+git status
+git checkout submission
+git commit -m "0325"
+git checkout submission
+git status
+git commit "0325"
+git commit -m "0325"
+git push -u origin submission
+cd /home/esp2026/kl3755
+git status -sb
+git diff --cached --name-only
+git diff --cached --stat
+git diff --cached --name-only
+git commit -m "Add ROB + commit logic for Milestone 2"
+git push -u origin submission
+cd /home/esp2026/kl3755
+git log -1 --oneline
+git branch -r
+git status
+cd /home/esp2026/kl3755
+git add p4.UNI/verilog/sys_defs.svh
+git status -sb
+git push
+ls
+git p4.UNI/
+cd p4.UNI/
+ls
+git clone git@github.com:CSEE4340-26/p4.UNI.git
+ls
+git status -sb
+git diff --cached --name-only
+git commit -m "Update sys_defs parameters for Milestone 2"
+cd ..
+ls
+cd p4.UNI/
+ls
+git status
+cd ..
+ls
+git clone git@github.com:CSEE4340-26/p4.UNI.git
+ls
+cd p4.UNI/
+ls
+git status
+git checkout submission
+cd /home/esp2026/kl3755/p4.UNI
+git status -sb
+git stash push -u -m "WIP before switching to submission"
+git checkout -b submission origin/submission
+git status
+git add test/rob_test.sv 
+git add verilog/rob.sv 
+git commit -m "0325"
+git add verilog/sys_defs.svh 
+git status
+git push
+ls
+cd p4.UNI/
+ls
+git pull
+git status
+git add Makefile verilog/rename_iq_top.sv pdfs/4340eecs_proposal.pdf verilog/rob_2wide.sv 
+git commit -m "0326"
+git push
+git status
+ls
+python3 compare/system_model/run_bw_combos.py
+git status
+ls
+git add compare/system_model/magma_bw_allocator.py compare/system_model/run_bw_combos.py 
+git commit -m "0330"
+git push
+python3 compare/system_model/run_bw_combos.py
+git status
+git add compare/system_model/run_bw_combos.py 
+git commit -m "0330 maestro DRAM allocator"
+git push
+git add compare/system_model/run_bw_combos.py 
+python3 compare/system_model/run_bw_combos.py
+ls
+lls
+ls
+mkdir 4840
+ls
+cd 4840
+ls
+cd lab3/
+ls
+qsys-edit soc_system.qsys
+cd lab3-hw\ 2/
+ls
+qsys-edit soc_system.qsys
+cd ..
+ls
+cd..
+cd ..
+ls
+cd usr
+ls
+cd ..
+ls
+cd tmp
+ls
+cd ..
+ls
+cd ..
+ls
+cd ..
+cd home 
+ls
+cd esp2026
+ls
+cd kl3755
+ls
+python3 compare/system_model/run_bw_combos.py
+ls
+cd 6868/
+ls
+./maestro --HW_file=data/hw/accelerator_1.m --Mapping_file=data/mapping/Resnet50_yxp_os.m --print_res_csv_file=true
+cd /home/esp2026/kl3755/6868/maestro
+./maestro --HW_file='data/hw/accelerator_1.m'  --Mapping_file='data/mapping/Resnet50_yxp_os.m'   --print_res=false --print_res_csv_file=true --print_log_file=false
+cp Resnet50_yxp_os.csv tools/jupyter_notebook/data/Resnet50_yxp_os_pe256.csv
+cd /home/esp2026/kl3755/6868 && python3 compare/system_model/run_bw_combos.py
+cd /home/esp2026/kl3755/6868 && BW_LAYER=CONV3_1_2 python3 compare/system_model/run_bw_combos.py
+cd /home/esp2026/kl3755/6868 && SYSTEM_BW=256 BW_LAYER=CONV2_1_2 python3 compare/system_model/run_bw_combos.py
+cd /home/esp2026/kl3755/6868/maestro && ./maestro --HW_file='data/hw/accelerator_1.m' --Mapping_file='data/mapping/Resnet50_yxp_os.m' --print_res=false --print_res_csv_file=true --print_log_file=false && cp Resnet50_yxp_os.csv tools/jupyter_notebook/data/Resnet50_yxp_os_pe256.csv
+cd ..
+git status
+cd ..
+cd 6868
+git push
+git commit -m "0405"
+cd /home/esp2026/kl3755
+git add compare/ docs/ maestro maestro_local_backup timeloop timeloop-accelergy-exercises timeloop-accelergy-exercises_local_backup timeloop_local_backup
+cd /home/esp2026/kl3755
+git add -u compare docs maestro maestro_local_backup timeloop timeloop-accelergy-exercises timeloop-accelergy-exercises_local_backup timeloop_local_backup
+ls
+cd 6868
+ls
+cd ~/6868
+git rev-parse --show-toplevel   # should print .../6868 if this is the repo root
+cd /home/esp2026/kl3755
+git add 6868/compare 6868/docs 6868/maestro 6868/maestro_local_backup         6868/timeloop 6868/timeloop-accelergy-exercises         6868/timeloop-accelergy-exercises_local_backup 6868/timeloop_local_backup
+(Adjust names if anything differs; git st; d; :wq exit
+cd /home/esp2026/kl3755
+git add -u compare docs maestro maestro_local_backup timeloop         timeloop-accelergy-exercises timeloop-accelergy-exercises_local_backup timeloop_local_backup
+ls
+cd /home/esp2026/kl3755
+pwd
+git status -sb
+git ls-files | grep -E '^compare/|^6868/compare/' | head
+cd /home/esp2026/kl3755
+git add -u 6868/compare 6868/docs 6868/maestro 6868/maestro_local_backup         6868/timeloop 6868/timeloop-accelergy-exercises         6868/timeloop-accelergy-exercises_local_backup 6868/timeloop_local_backup
+ls
+cd 6868
+ls
+git sstatus
+git status
+git commit -m "0405"
+git push
+git status
+cd /home/esp2026/kl3755/6868_project && python3 compare/system_model/run_bw_combos.py
+cd /home/esp2026/kl3755/6868_project && BW_LAYER=CONV3_1_2 SYSTEM_BW=256 python3 compare/system_model/run_bw_combos.py
+cd /home/esp2026/kl3755 && git pull origin submission
+git status
+ls
+cd 6868_project
+ls
+cd /home/esp2026/kl3755   # your repo root
+git pull origin submission
+ls
+ls 6868
+git status
+cd /home/esp2026/kl3755 && git status -sb
+cd /path/to/6868
+ls
+cd 6868
+for L in CONV2_1_2 CONV3_1_2 CONV4_1_2; do   echo "=== BW_LAYER=$L ===";   BW_LAYER=$L python3 compare/system_model/run_bw_combos.py; done
+git status
+git add compare/system_model/README.md
+git commit -m "0405 md"
+git push
+cd ..
+ls
+cd p4.UNI/
+git status
+git clone git@github.com:CSEE4340-26/p4.UNI.git
+git status
+git add Makefile verilog/rename_iq_top.sv verilog/rob_2wide.sv verilog/sys_defs.svh test/lsq_2wide_test.sv verilog/lsq_2wide.sv 
+git status
+git commit -m"0405 Kevin Liu"
+git push
+cd ~/p4.UNI
+ls
+git add   Makefile   verilog/sys_defs.svh   verilog/rob_2wide.sv   verilog/rename_iq_top.sv   verilog/lsq_2wide.sv   test/lsq_2wide_test.sv
+git commit -m "Fix ROB/LSQ and Makefile (6 files)"
+git pull --rebase origin submission
+git push origin submission
+cd ~/p4.UNI
+make rob.pass              # scalar ROB
+make lsq_2wide.pass        # LSQ + rob_2wide testbench
+make rename_iq_top.pass    # rename + IQ + ROB glue
+module avail vcs 2>/dev/null | head -20   # optional: see exact module name
+module load vcs
+# if that fails, try:
+module load synopsys
+# or whatever your cluster documents, e.g.:
+# module load vcs verdi synopsys-synth
+make rob.pass
+make rob.pass VCS_BIN=/full/path/to/vcs
+type vcs 2>/dev/null
+which vcs 2>/dev/null
+find /tools /opt /usr/synopsys -type f -name vcs 2>/dev/null | head -5
+cd ~/p4.UNI
+make rob.pass VCS_BIN=/full/path/to/vcs
+ls
+cd p4.UNI/
+ls
+git pull
+make rob.pass
+make rob.pass VCS_BIN=/full/path/to/vcs
+make lsq_2wide.pass VCS_BIN=/full/path/to/vcs
+find /tools /opt /usr/synopsys /apps -type f -name vcs 2>/dev/null | head -10
+which vcs
+ls
+cd 6868
+python3 compare/system_model/run_scar_multi_model_bw.py
+SCAR_SCENARIO=DC_A SYSTEM_BW=256 python3 compare/system_model/run_scar_multi_model_bw.py
+python3 compare/system_model/run_scar_multi_model_bw.py
+SCAR_SCENARIO=DC_A SYSTEM_BW=256 python3 compare/system_model/run_scar_multi_model_bw.py
+SCAR_OUT_CSV=compare/results/scar_multi_model_bw.csv   python3 compare/system_model/run_scar_multi_model_bw.py
+python3 compare/system_model/run_bw_combos.py
+BW_LAYER=CONV3_1_2 SYSTEM_BW=100 python3 compare/system_model/run_bw_combos.py
+python3 compare/system_model/run_example.py
+python3 compare/system_model/run_bw_combos.py
+BW_LAYER=CONV3_1_2 python3 compare/system_model/run_bw_combos.py
+SYSTEM_BW=256 python3 compare/system_model/run_bw_combos.py
+git status
+git add compare/system_model/README.md docs/SYSTEM_LEVEL_MODEL.md 
+git add compare/results/scar_multi_model_bw.csv
+git add compare/system_model/maestro_layer_metrics.py 
+git add compare/system_model/run_scar_multi_model_bw.py 
+git add compare/system_model/scar_workloads.json 
+git commit -m "0406 SCAR"
+git push
+ls
+cd 6868/
+ls
+pip install torch torchvision
+cd /path/to/6868
+python3 compare/scripts/export_resnet_mobilenet_onnx.py
+pip install --user onnx
+pip install onnx
+cd ~/6868 && python3 compare/scripts/export_resnet_mobilenet_onnx.py
+python3 compare/system_model/run_bw_combos_full_network.py
+python3 compare/system_model/run_mobilenet_full_network_bw.py
+python3 compare/system_model/run_bw_combos_full_network.py
+FULLNET_COMBO=RS_WS SYSTEM_BW=256 python3 compare/system_model/run_bw_combos_full_network.py
+FULLNET_OUT_CSV=compare/results/full_net_bw_layers.csv   python3 compare/system_model/run_bw_combos_full_network.py
+python3 compare/system_model/run_mobilenet_full_network_bw.py
+FULLNET_COMBO=RS_WS SYSTEM_BW=100 python3 compare/system_model/run_mobilenet_full_network_bw.py
+MOBILENET_FULLNET_OUT_CSV=compare/results/mobilenet_full_net_bw_layers.csv   python3 compare/system_model/run_mobilenet_full_network_bw.py
+cd ..
+pip install matplotlib
+cd /path/to/6868
+ls
+cd 6868/
+# Produce CSV then plot (ResNet-50 full net)
+FULLNET_OUT_CSV=compare/results/full_net_bw_layers.csv   python3 compare/system_model/run_bw_combos_full_network.py
+python3 compare/system_model/visualize_makespan.py   --csv compare/results/full_net_bw_layers.csv   --out compare/results/makespan_resnet.png
+python3 compare/system_model/visualize_makespan.py   --csv compare/results/full_net_bw_layers.csv   --out compare/results/makespan_resnet_cumulative.png --cumulative
+SCAR_OUT_CSV=compare/results/scar.csv   python3 compare/system_model/run_scar_multi_model_bw.py
+python3 compare/system_model/visualize_makespan.py   --csv compare/results/scar.csv --out compare/results/makespan_scar.png
+SCAR_OUT_CSV=compare/results/scar.csv python3 compare/system_model/run_scar_multi_model_bw.py
+python3 compare/system_model/visualize_makespan.py   --csv compare/results/scar.csv --out compare/results/makespan_scar.png
+python3 compare/system_model/visualize_makespan.py   --csv compare/results/scar.csv --out compare/results/makespan_scar.png
+ls
+cd 6868
+ls
+git status
+git add -A -- ':!p4.UNI'
+ls
+cd /home/esp2026/kl3755
+git add -A -- ':!p4.UNI'
+ls
+cd 6868/
+ls
+git status
+cd /home/esp2026/kl3755
+git restore --staged . 2>/dev/null
+git add -A --   ':!p4.UNI'   ':!.cache' ':!.local' ':!.ssh' ':!.bash_history' ':!.Xauthority'
+git status
+git commit -m "0413"
+git push
+cd /path/to/6868
+cd 6868
+FULLNET_OUT_CSV=compare/results/full_net_bw_layers.csv \
+MOBILENET_FULLNET_OUT_CSV=compare/results/mobilenet_full_net_bw_layers.csv   python3 compare/system_model/run_mobilenet_full_network_bw.py
+LOOKUP_OUT_CSV=compare/results/layer_accel_lookup_resnet50.csv   python3 compare/system_model/build_layer_lookup.py
+python3 compare/system_model/visualize_layer_results.py --kind lookup   --csv compare/results/layer_accel_lookup_resnet50.csv   --out compare/results/plot_layer_lookup.png
+ls
+cd 686
+cd 6868
+python3 compare/system_model/visualize_layer_results.py --kind lookup   --csv compare/results/layer_accel_lookup_resnet50.csv   --out compare/results/plot_layer_lookup.png
+python3 compare/system_model/visualize_layer_results.py --kind lookup   --csv compare/results/layer_accel_lookup_resnet50.csv   --out compare/results/plot_layer_lookup.png
+cd /home/esp2026/kl3755/6868
+python3 compare/system_model/visualize_layer_results.py --kind lookup   --csv compare/results/layer_accel_lookup_resnet50.csv   --out compare/results/plot_layer_lookup.png
+python3 compare/system_model/visualize_layer_results.py --kind traffic --combo OS_RS   --csv compare/results/full_net_bw_layers.csv   --out compare/results/plot_fullnet_traffic_OS_RS.png
+cd /home/esp2026/kl3755/6868
+TRAFFIC_PLOT_MAX_XTICKS=66 python3 compare/system_model/visualize_layer_results.py --kind traffic --combo OS_RS   --csv compare/results/full_net_bw_layers.csv   --out compare/results/plot_fullnet_traffic_OS_RS.png
+git status
+ls
+cd 6868
+LOOKUP_POLICY=min_makespan SYSTEM_BW=100   LOOKUP_OUT_CSV=compare/results/layer_accel_lookup_resnet50_bw.csv   python3 compare/system_model/build_layer_lookup.py
+python3 compare/system_model/visualize_layer_results.py --kind lookup   --csv compare/results/layer_accel_lookup_resnet50_bw.csv   --out compare/results/plot_layer_lookup_bw.png
+python3 compare/system_model/visualize_layer_results.py --kind traffic --combo OS_RS   --csv compare/results/full_net_bw_layers.csv   --out compare/results/plot_fullnet_traffic_OS_RS.png
+python3 compare/system_model/visualize_layer_results.py --kind lookup   --csv compare/results/layer_accel_lookup_resnet50_bw.csv   --out compare/results/plot_layer_lookup_bw.png
+python3 compare/system_model/visualize_layer_results.py --kind lookup   --csv compare/results/layer_accel_lookup_resnet50_bw.csv   --out compare/results/plot_layer_lookup_bw.png
+TRAFFIC_PLOT_MAX_XTICKS=66 python3 compare/system_model/visualize_layer_results.py --kind traffic --combo OS_RS   --csv compare/results/full_net_bw_layers.csv   --out compare/results/plot_fullnet_traffic_OS_RS.png
+# Change partner
+LOOKUP_POLICY=min_makespan SYSTEM_BW=100 LOOKUP_PARTNER_DATAFLOW=NVDLA_WS   LOOKUP_OUT_CSV=compare/results/layer_accel_lookup_resnet50_bw_partnerWS.csv   python3 compare/system_model/build_layer_lookup.py
+python3 compare/system_model/visualize_layer_results.py --kind lookup   --csv compare/results/layer_accel_lookup_resnet50_bw_partnerWS.csv   --out compare/results/plot_layer_lookup_bw_partnerWS.png
+# Change bandwidth cap
+LOOKUP_POLICY=min_makespan SYSTEM_BW=50   LOOKUP_OUT_CSV=compare/results/layer_accel_lookup_resnet50_bw_bw50.csv   python3 compare/system_model/build_layer_lookup.py
+python3 compare/system_model/visualize_layer_results.py --kind lookup   --csv compare/results/layer_accel_lookup_resnet50_bw_bw50.csv   --out compare/results/plot_layer_lookup_bw_bw50.png
+ls
+cd 6868
+ls
+git status
+git push
+git commit -m "0423"
+git push
+SYSTEM_BW=100 GREEDY4_OUT_CSV=compare/results/greedy_four_chiplet_schedule.csv   python3 compare/system_model/run_greedy_four_chiplet.py
+python3 compare/system_model/visualize_greedy_four_chiplet.py   --csv compare/results/greedy_four_chiplet_schedule.csv   --out compare/results/greedy_four_chiplet.png
+git status
+git commit -m "0427"
+git push
+. "/home/esp2026/kl3755/.cursor-server/bin/linux-x64/e9ee1339915a927dfb2df4a836dd9c8337e17cc0/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh"
+. "/home/esp2026/kl3755/.cursor-server/bin/linux-x64/e9ee1339915a927dfb2df4a836dd9c8337e17cc0/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh"

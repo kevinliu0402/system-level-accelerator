@@ -185,6 +185,8 @@ python3 compare/system_model/visualize_layer_results.py --kind traffic --combo O
   --out compare/results/plot_fullnet_traffic_OS_RS.png
 ```
 
+Add **`--drop-last-n N`** to omit the last *N* layers from the figure only (CSV unchanged); the plot footer states when layers were omitted.
+
 The **traffic** figure uses three stacked panels: **allocator `makespan` + `bw_util`** (same MAGMA model as `visualize_makespan.py`), **per-layer MAESTRO `total_traffic` bars**, and **cumulative makespan vs cumulative traffic** (dual *y*). The **lookup** figure adds a **cumulative serial-time** panel: MAESTRO runtime sum for the chosen mapping and, when the CSV includes `*_makespan_cycles`, cumulative MAGMA makespan for the same choices under shared BW.
 
 **Lookup table (`build_layer_lookup.py`):** `LOOKUP_POLICY=min_latency` (default) picks the lowest MAESTRO runtime per layer with no bus contention. Use **`LOOKUP_POLICY=min_makespan`** with **`SYSTEM_BW`** and optional **`LOOKUP_PARTNER_DATAFLOW`** (default `Eyeriss_RS`) to score each core0 mapping by **MAGMA allocator makespan** for that layer versus a fixed partner on core1—so choices reflect slowdown when combined demand exceeds the shared cap. Regenerate the CSV, then point `visualize_layer_results.py --kind lookup` at it; plots auto-detect `*_makespan_cycles` columns and label axes accordingly.
