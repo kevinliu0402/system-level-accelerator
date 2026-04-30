@@ -157,9 +157,9 @@ SCAR_SCENARIO=DC_A SCAR_OUT_CSV=compare/results/scar_multi_model_bw.csv \
   SYSTEM_BW=256 python3 compare/system_model/run_scar_multi_model_bw.py
 ```
 
-## Greedy 4-chiplet schedule (SCAR-inspired, ResNet + MobileNet)
+## Greedy 4-chiplet schedule (SCAR-inspired, 3-model workload)
 
-Heterogeneous **four chiplets** (two **WS**, one **OS**, one **RS**), **two** single-stream networks (**ResNet-50**, **MobileNetV2**). Each step greedily picks a legal chiplet pair (or one chiplet when a network is finished) to minimize **completion time** under the **2-core MAGMA `bw_allocator`** with shared **`SYSTEM_BW`**.
+Heterogeneous **four chiplets** (two **WS**, one **OS**, one **RS**), **three** single-stream networks (**ResNet-50**, **MobileNetV2**, **SqueezeNet1_0**). Each step greedily picks a legal chiplet assignment (1–3 concurrent layers on distinct chiplets) to minimize **completion time** under the **MAGMA `bw_allocator`** with shared **`SYSTEM_BW`**.
 
 ```bash
 cd /path/to/6868
@@ -169,6 +169,28 @@ python3 compare/system_model/visualize_greedy_four_chiplet.py \
   --csv compare/results/greedy_four_chiplet_schedule.csv \
   --out compare/results/greedy_four_chiplet.png
 ```
+
+## Windowed + pipelined 4-chiplet schedule (SCAR-plus)
+
+Adds two ideas beyond the greedy baseline:
+
+- **Time windows (receding horizon)**: a planning window of `WINDOW_CYCLES` is used to choose dispatches; the window slides forward by `WINDOW_STRIDE`.
+- **Layer pipelining (MEM/COMP phases)**: each layer is split into a **MEM** portion (uses shared BW, modeled by MAGMA-style proportional allocation) and a **COMP** portion (BW-free). This enables overlap between one model's COMP and another model's MEM.
+
+```bash
+cd /path/to/6868
+SYSTEM_BW=100 WINDOW_CYCLES=5000000 WINDOW_STRIDE=5000000 MEM_FRAC=0.30 \
+  WP4_OUT_CSV=compare/results/windowed_pipelined_four_chiplet_schedule.csv \
+  python3 compare/system_model/run_windowed_pipelined_four_chiplet.py
+
+python3 compare/system_model/visualize_greedy_four_chiplet.py \
+  --csv compare/results/windowed_pipelined_four_chiplet_schedule.csv \
+  --out compare/results/windowed_pipelined_four_chiplet.png
+```
+
+Tuning knobs:
+- `LOOKAHEAD_STEPS` (default `2`) and `BEAM_WIDTH` (default `8`) control the limited lookahead search.
+- `MEM_FRAC` is a modeling knob (default `0.30`), not a measured hardware constant.
 
 ## Plot layer results (`visualize_layer_results.py`)
 
