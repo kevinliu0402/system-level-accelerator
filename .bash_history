@@ -648,3 +648,17 @@ git commit -m "0427"
 git push
 . "/home/esp2026/kl3755/.cursor-server/bin/linux-x64/e9ee1339915a927dfb2df4a836dd9c8337e17cc0/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh"
 . "/home/esp2026/kl3755/.cursor-server/bin/linux-x64/e9ee1339915a927dfb2df4a836dd9c8337e17cc0/out/vs/workbench/contrib/terminal/common/scripts/shellIntegration-bash.sh"
+ls
+c d6868
+cd 6868/
+ls
+cd p4
+python3 compare/system_model/visualize_layer_results.py --kind lookup --drop-last-n 1   --csv compare/results/layer_accel_lookup_resnet50.csv --out compare/results/plot_layer_lookup.png
+git status
+git commit -m "squeezeNet"
+git push
+SYSTEM_BW=100 WINDOW_CYCLES=5000000 WINDOW_STRIDE=5000000 MEM_FRAC=0.30   WP4_OUT_CSV=compare/results/windowed_pipelined_four_chiplet_schedule.csv   python3 compare/system_model/run_windowed_pipelined_four_chiplet.py
+python3 compare/system_model/visualize_greedy_four_chiplet.py   --csv compare/results/windowed_pipelined_four_chiplet_schedule.csv   --out compare/results/windowed_pipelined_four_chiplet.png
+git status
+git commit -m "pipelined"
+git push

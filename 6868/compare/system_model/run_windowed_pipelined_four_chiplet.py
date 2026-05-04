@@ -380,7 +380,12 @@ def main() -> None:
         # if nothing is ready at that time, jump to earliest net_ready_t that is >= t
         ready_now = _ready_networks(next_idx, layers, net_ready_t, t)
         if not ready_now:
-            t2 = min(net_ready_t.values())
+            # Only consider networks that still have layers; finished nets keep old net_ready_t
+            # and would otherwise pin min(...) in the past and cause a bogus early exit.
+            unfinished = [n for n in layers if next_idx[n] < len(layers[n])]
+            if not unfinished:
+                break
+            t2 = min(net_ready_t[n] for n in unfinished)
             t = max(t, t2)
             ready_now = _ready_networks(next_idx, layers, net_ready_t, t)
         if not ready_now:

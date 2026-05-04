@@ -123,8 +123,10 @@ def main() -> None:
             except (TypeError, ValueError):
                 continue
             epochs[e] = te
+        # Window boundaries are times in cycles (t_epoch). Only draw them on ax1 where x is time.
+        # Drawing them on ax0 would use step indices as x — mixing cycles into that axis squashes the
+        # completion curve and makes markers look clustered at x≈0.
         for te in sorted(set(epochs.values())):
-            ax0.axvline(x=te, color="black", lw=0.5, alpha=0.08)
             ax1.axvline(x=te, color="black", lw=0.8, alpha=0.18)
     else:
         # greedy CSV: one row per step; use alpha tiers per network column
