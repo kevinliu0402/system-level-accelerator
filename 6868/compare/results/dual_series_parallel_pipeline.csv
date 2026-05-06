@@ -1,0 +1,4 @@
+row_kind,path,network,acc0,acc1,layers,seg0_depth,seg1_depth,seg0,seg1,batches,T0,T1,T_comm,makespan_closed,makespan_sim,stall0_full,stall1_empty
+path,A,resnet50,NVDLA_WS,Eyeriss_RS,CONV1|CONV2_1_1|CONV2_1_2|CONV2_1_3,2,2,CONV1|CONV2_1_1,CONV2_1_2|CONV2_1_3,8,1431026.000000,257026.000000,0.000000,11705234.000000,11705234.000000,0.000000,8218000.000000
+path,B,mobilenet_v2,NVDLA_WS,ShiDianNao_OS,CONV1|Bottleneck1_1_1|Bottleneck1_1_2|Bottleneck1_1_3,2,2,CONV1|Bottleneck1_1_1,Bottleneck1_1_2|Bottleneck1_1_3,8,401410.000000,112454.000000,0.000000,3323734.000000,3323734.000000,0.000000,2022692.000000
+wall,,resnet50+mobilenet_v2,,,,,,,,8,,,,11705234.000000,11705234.000000,,

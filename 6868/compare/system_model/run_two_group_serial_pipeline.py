@@ -29,7 +29,7 @@ import csv
 import os
 import sys
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import List, Optional, Sequence, Tuple
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if REPO not in sys.path:
@@ -97,58 +97,181 @@ def pipeline_simulate_double_buffer(T0: float, T1: float, T_comm: float, N: int)
         return SimResult(0.0, 0.0, 0.0, 0.0, 0.0)
 
     t = 0.0
-    buf = 0  # 0..2 tokens
-    b0 = 0   # batches produced
-    b1 = 0   # batches consumed/finished
+    buf = 0  # 0..2 tokens currently stored (produced by Acc0, not yet consumed by Acc1)
+    b0_started = 0
+    b0_done = 0
+    b1_started = 0
+    b1_done = 0
 
     acc0_free = 0.0
     acc1_free = 0.0
+    next_acc0_done: float = float("inf")
+    next_acc1_done: float = float("inf")
 
     acc0_busy = 0.0
     acc1_busy = 0.0
     acc0_stall_full = 0.0
     acc1_stall_empty = 0.0
 
-    while b1 < N:
-        # pick next event time
-        next_t = min(acc0_free, acc1_free)
-        t = max(t, next_t)
+    def update_event_times() -> None:
+        nonlocal next_acc0_done, next_acc1_done
+        next_acc0_done = acc0_free if b0_started > b0_done else float("inf")
+        next_acc1_done = acc1_free if b1_started > b1_done else float("inf")
+
+    update_event_times()
+
+    while b1_done < N:
+        # advance to next completion event (Acc0 finishes seg0 or Acc1 finishes seg1)
+        t_next = min(next_acc0_done, next_acc1_done)
+        if t_next == float("inf"):
+            # nothing in flight; try to start work below
+            t_next = t
+        t = max(t, t_next)
+
+        # apply completions at time t
+        if abs(t - next_acc0_done) <= 1e-12:
+            buf = min(2, buf + 1)
+            b0_done += 1
+            update_event_times()
+        if abs(t - next_acc1_done) <= 1e-12:
+            b1_done += 1
+            update_event_times()
 
         progressed = False
 
-        # Acc0 can run if it has work and buffer has space.
-        if t >= acc0_free - 1e-12 and b0 < N:
-            if buf < 2:
-                acc0_busy += T0
-                acc0_free = t + T0
-                buf += 1
-                b0 += 1
-                progressed = True
-            else:
-                # stall until acc1 consumes (unknown yet). advance in small step by syncing to acc1_free.
-                stall_to = max(t, acc1_free)
-                if stall_to > t:
-                    acc0_stall_full += stall_to - t
-                    acc0_free = stall_to
-                    progressed = True
-
-        # Acc1 can run if it has work and buffer has data.
-        if t >= acc1_free - 1e-12 and b1 < N:
+        # try to start Acc1 if idle and data available
+        if t >= acc1_free - 1e-12 and b1_started < N:
             if buf > 0:
                 buf -= 1
+                b1_started += 1
                 acc1_busy += (T_comm + T1)
                 acc1_free = t + T_comm + T1
-                b1 += 1
+                update_event_times()
                 progressed = True
             else:
-                stall_to = max(t, acc0_free)
-                if stall_to > t:
-                    acc1_stall_empty += stall_to - t
-                    acc1_free = stall_to
+                # stall until Acc0 produces a token (next_acc0_done)
+                if next_acc0_done != float("inf") and next_acc0_done > t:
+                    acc1_stall_empty += next_acc0_done - t
+                    acc1_free = next_acc0_done
+                    update_event_times()
+                    progressed = True
+
+        # try to start Acc0 if idle and buffer has space
+        if t >= acc0_free - 1e-12 and b0_started < N:
+            if buf < 2:
+                b0_started += 1
+                acc0_busy += T0
+                acc0_free = t + T0
+                update_event_times()
+                progressed = True
+            else:
+                # stall until Acc1 consumes a token (next_acc1_done or Acc1 start)
+                if next_acc1_done != float("inf") and next_acc1_done > t:
+                    acc0_stall_full += next_acc1_done - t
+                    acc0_free = next_acc1_done
+                    update_event_times()
                     progressed = True
 
         if not progressed:
-            # avoid deadlock on exact ties
+            # nudge time to avoid stalling on exact ties
+            t += 1e-9
+
+    return SimResult(
+        makespan=max(acc0_free, acc1_free),
+        acc0_busy=acc0_busy,
+        acc1_busy=acc1_busy,
+        acc0_stall_full=acc0_stall_full,
+        acc1_stall_empty=acc1_stall_empty,
+    )
+
+
+def pipeline_simulate_double_buffer_sequence(
+    T0s: Sequence[float],
+    T1s: Sequence[float],
+    T_comm: float,
+) -> SimResult:
+    """
+    Same double-buffer semantics as ``pipeline_simulate_double_buffer``, but each pipeline
+    batch k uses its own (T0s[k], T1s[k]) service times (e.g. different layer groupings).
+    """
+    N = len(T0s)
+    if N == 0:
+        return SimResult(0.0, 0.0, 0.0, 0.0, 0.0)
+    if len(T1s) != N:
+        raise ValueError("T0s and T1s must have the same length")
+
+    t = 0.0
+    buf = 0
+    b0_started = 0
+    b0_done = 0
+    b1_started = 0
+    b1_done = 0
+
+    acc0_free = 0.0
+    acc1_free = 0.0
+    next_acc0_done: float = float("inf")
+    next_acc1_done: float = float("inf")
+
+    acc0_busy = 0.0
+    acc1_busy = 0.0
+    acc0_stall_full = 0.0
+    acc1_stall_empty = 0.0
+
+    def update_event_times() -> None:
+        nonlocal next_acc0_done, next_acc1_done
+        next_acc0_done = acc0_free if b0_started > b0_done else float("inf")
+        next_acc1_done = acc1_free if b1_started > b1_done else float("inf")
+
+    update_event_times()
+
+    while b1_done < N:
+        t_next = min(next_acc0_done, next_acc1_done)
+        if t_next == float("inf"):
+            t_next = t
+        t = max(t, t_next)
+
+        if abs(t - next_acc0_done) <= 1e-12:
+            buf = min(2, buf + 1)
+            b0_done += 1
+            update_event_times()
+        if abs(t - next_acc1_done) <= 1e-12:
+            b1_done += 1
+            update_event_times()
+
+        progressed = False
+
+        if t >= acc1_free - 1e-12 and b1_started < N:
+            if buf > 0:
+                buf -= 1
+                idx = b1_started
+                acc1_busy += T_comm + T1s[idx]
+                acc1_free = t + T_comm + T1s[idx]
+                b1_started += 1
+                update_event_times()
+                progressed = True
+            else:
+                if next_acc0_done != float("inf") and next_acc0_done > t:
+                    acc1_stall_empty += next_acc0_done - t
+                    acc1_free = next_acc0_done
+                    update_event_times()
+                    progressed = True
+
+        if t >= acc0_free - 1e-12 and b0_started < N:
+            if buf < 2:
+                idx = b0_started
+                acc0_busy += T0s[idx]
+                acc0_free = t + T0s[idx]
+                b0_started += 1
+                update_event_times()
+                progressed = True
+            else:
+                if next_acc1_done != float("inf") and next_acc1_done > t:
+                    acc0_stall_full += next_acc1_done - t
+                    acc0_free = next_acc1_done
+                    update_event_times()
+                    progressed = True
+
+        if not progressed:
             t += 1e-9
 
     return SimResult(

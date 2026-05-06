@@ -1,0 +1,4 @@
+row_kind,path,network,acc0,acc1,layers,batching,micro_batches,T_comm,makespan_closed,makespan_sim,shared_bw_gbps,comm_bytes_total,comm_cycles_total,stall0_full,stall1_empty
+path,A,mixed,NVDLA_WS,Eyeriss_RS,resnet50:CONV1|resnet50:CONV2_1_1|resnet50:CONV2_1_2,"[(1, 2)]",8,0.0,10730378.000000,10730378.000000,25.000000,2985984.000000,955514.880000,0.000000,8719753.000000
+path,B,mixed,NVDLA_WS,ShiDianNao_OS,resnet50:CONV2_1_3|mobilenet_v2:CONV1|mobilenet_v2:Bottleneck1_1_1|mobilenet_v2:Bottleneck1_1_2|mobilenet_v2:Bottleneck1_1_3,"[(1, 2), (1, 1)]",8,0.0,4415513.000000,4415513.000000,25.000000,2985984.000000,955514.880000,517418.000000,0.000000
+wall,,wall,,,,,8,0.0,11685892.880000,11685892.880000,25.000000,2985984.000000,955514.880000,,

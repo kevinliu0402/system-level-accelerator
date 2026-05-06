@@ -93,6 +93,47 @@ def layer_latency_and_bw_req(
     return float(rt_raw), float(bw_raw), full, proxied
 
 
+def layer_field_float(
+    network: str,
+    layer: str,
+    dataflow: str,
+    field: str,
+    *,
+    default: float = 0.0,
+) -> Tuple[float, str]:
+    """
+    Read an arbitrary numeric field from the MAESTRO per-layer CSV row.
+
+    Returns (value, csv_path_used). If the field is missing or empty, returns (default, path).
+    """
+    net = network.lower().strip()
+    df = dataflow.strip()
+    if net not in MODEL_CSVS or df not in MODEL_CSVS[net]:
+        raise KeyError(f"Unknown network {network!r} or dataflow {dataflow!r}")
+
+    fname = MODEL_CSVS[net][df]
+    full = os.path.join(_MAESTRO_DATA, fname)
+    if net == "resnet50" and df == "ShiDianNao_OS" and not os.path.isfile(full):
+        full = resolve_os_csv_path()
+    elif not os.path.isfile(full):
+        raise FileNotFoundError(f"Missing MAESTRO CSV: {full}")
+
+    r = _load_layer_row(full, layer)
+    raw = _row_field(r, field, f" {field}")
+    if not raw:
+        return float(default), full
+    try:
+        return float(raw), full
+    except ValueError:
+        return float(default), full
+
+
+def layer_output_l2_write_elems(network: str, layer: str, dataflow: str) -> float:
+    """Proxy for activation size: MAESTRO CSV column ``output l2 write`` (elements)."""
+    v, _ = layer_field_float(network, layer, dataflow, "output l2 write", default=0.0)
+    return v
+
+
 def resolve_os_csv_path() -> str:
     """ResNet OS CSV, or RS proxy if OS file missing (same as run_bw_combos)."""
     os_csv = os.path.join(_MAESTRO_DATA, "Resnet50_yxp_os_pe256.csv")
